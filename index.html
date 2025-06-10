@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的 Strapi 博客练习</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        h1 { color: #0056b3; }
+        .article {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .article h2 { color: #333; margin-top: 0; }
+        .error-message { color: red; font-weight: bold; }
+        .loading-message { color: gray; font-style: italic; }
+    </style>
+</head>
+<body>
+    <h1>来自 Strapi Cloud 的博客文章</h1>
+    <div id="articles-container" class="loading-message">正在加载文章...</div>
+
+    <script>
+        // *** 1. Strapi API 地址 - 请务必替换为您的实际 Strapi Cloud 项目 API 地址 ***
+        // 您的 Strapi Cloud API 地址是：https://efficient-horses-205a130042.strapiapp.com
+        // 因此，获取文章列表的 API 地址是：
+        const STRAPI_API_URL = 'https://efficient-horses-205a130042.strapiapp.com/api/articles';
+
+        // *** 2. Full Access API Token - 仅用于本次练习，生产环境慎用 ***
+        // 您提供的 Full Access API Key 是：
+        const FULL_ACCESS_API_TOKEN = 'f10f83b690a49ef9bf37d8b8cdfd634150453fd94babd31dc7038eb9aba457debd56c74717954ace6d5478c7639e393bc1ded8811afdbfb13935e341b4ad19526f0b1e302433a3dad7123ed072cea90f0f4492b87b914a2ca69d679fb095c939e4eff8';
+
+        async function fetchArticles() {
+            const articlesContainer = document.getElementById('articles-container');
+            articlesContainer.innerHTML = '<div class="loading-message">正在加载文章...</div>'; // 显示加载状态
+
+            try {
+                const response = await fetch(STRAPI_API_URL, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // *** 在这里添加 Full Access Token，用于本次练习绕过公共权限问题 ***
+                        'Authorization': `Bearer ${FULL_ACCESS_API_TOKEN}`
+                    }
+                });
+
+                if (!response.ok) {
+                    // 如果响应状态码不是 2xx，抛出错误
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! Status: ${response.status}, Details: ${errorText}`);
+                }
+
+                const data = await response.json();
+
+                articlesContainer.innerHTML = ''; // 清空加载状态
+
+                if (data && data.data && Array.isArray(data.data)) {
+                    if (data.data.length === 0) {
+                        articlesContainer.textContent = '目前没有找到任何文章。请在 Strapi 后台发布文章。';
+                        return;
+                    }
+                    data.data.forEach(article => {
+                        const articleElement = document.createElement('div');
+                        articleElement.classList.add('article');
+
+                        const titleElement = document.createElement('h2');
+                        titleElement.textContent = article.attributes.title || '无标题';
+
+                        const contentElement = document.createElement('p');
+                        // 简单的文本内容，不处理富文本的 HTML 标签
+                        contentElement.textContent = article.attributes.content || '无内容';
+
+                        articleElement.appendChild(titleElement);
+                        articleElement.appendChild(contentElement);
+                        articlesContainer.appendChild(articleElement);
+                    });
+                } else {
+                    articlesContainer.innerHTML = '<div class="error-message">获取文章数据格式不正确。</div>';
+                    console.error('API 返回的数据格式不正确:', data);
+                }
+
+            } catch (error) {
+                console.error('获取文章失败:', error);
+                articlesContainer.innerHTML = `<div class="error-message">加载文章出错！请检查控制台或 Strapi 后端设置。<br>错误信息: ${error.message}</div>`;
+            }
+        }
+
+        // 页面加载完成后立即获取文章
+        document.addEventListener('DOMContentLoaded', fetchArticles);
+    </script>
+</body>
+</html>
