@@ -1,25 +1,48 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的 Strapi 博客练习</title>
     <style>
-        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
-        h1 { color: #0056b3; }
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        h1 {
+            color: #0056b3;
+        }
+
         .article {
             background-color: #fff;
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        .article h2 { color: #333; margin-top: 0; }
-        .error-message { color: red; font-weight: bold; }
-        .loading-message { color: gray; font-style: italic; }
+
+        .article h2 {
+            color: #333;
+            margin-top: 0;
+        }
+
+        .error-message {
+            color: red;
+            font-weight: bold;
+        }
+
+        .loading-message {
+            color: gray;
+            font-style: italic;
+        }
     </style>
 </head>
+
 <body>
     <h1>来自 Strapi Cloud 的博客文章</h1>
     <div id="articles-container" class="loading-message">正在加载文章...</div>
@@ -32,7 +55,7 @@
 
         // *** 2. Full Access API Token - 仅用于本次练习，生产环境慎用 ***
         // 您提供的 Full Access API Key 是：
-        const FULL_ACCESS_API_TOKEN = 'f10f83b690a49ef9bf37d8b8cdfd634150453fd94babd31dc7038eb9aba457debd56c74717954ace6d5478c7639e393bc1ded8811afdbfb13935e341b4ad19526f0b1e302433a3dad7123ed072cea90f0f4492b87b914a2ca69d679fb095c939e4eff8';
+        const FULL_ACCESS_API_TOKEN = 'f10f83b690a49ef9bf37d8b8cdfd634150453fd94babd31dc7038eb9aba457debd56c7455e15201d0ff3426621c3f2528faea14fd10a09cdd12143ff8b122cd74717954ace6d5478c7639e393bc1ded8811afdbfb13935e341b4ad19526f0b1e302433a3dad7123ed072cea90f0f4492b87b914a2ca69d679fb095c939e4eff8';
 
         async function fetchArticles() {
             const articlesContainer = document.getElementById('articles-container');
@@ -93,4 +116,5 @@
         document.addEventListener('DOMContentLoaded', fetchArticles);
     </script>
 </body>
+
 </html>
