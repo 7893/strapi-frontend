@@ -1,24 +1,39 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的 Strapi 博客练习</title>
     <style>
-        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; line-height: 1.6; }
-        h1 { color: #0056b3; text-align: center; margin-bottom: 30px; }
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        h1 {
+            color: #0056b3;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
         .article {
             background-color: #fff;
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 25px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s ease-in-out;
         }
+
         .article:hover {
             transform: translateY(-5px);
         }
+
         .article h2 {
             color: #333;
             margin-top: 0;
@@ -27,10 +42,12 @@
             padding-bottom: 10px;
             margin-bottom: 15px;
         }
+
         .article p {
             font-size: 1em;
             color: #555;
         }
+
         .error-message {
             color: red;
             font-weight: bold;
@@ -40,16 +57,23 @@
             background-color: #ffebeb;
             border-radius: 5px;
         }
+
         .loading-message {
             color: gray;
             font-style: italic;
             text-align: center;
             padding: 20px;
         }
+
         /* 简单样式，让富文本内容看起来更好 */
-        .article p, .article ul, .article ol, .article h3, .article h4 {
+        .article p,
+        .article ul,
+        .article ol,
+        .article h3,
+        .article h4 {
             margin-bottom: 1em;
         }
+
         .article img {
             max-width: 100%;
             height: auto;
@@ -59,29 +83,20 @@
         }
     </style>
 </head>
+
 <body>
     <h1>来自 Strapi Cloud 的博客文章</h1>
     <div id="articles-container" class="loading-message">正在加载文章...</div>
 
     <script>
-        // *** 1. Strapi API 地址 - 请务必确认此地址是否正确 ***
         const STRAPI_API_URL = 'https://efficient-horses-205a130042.strapiapp.com/api/articles';
-
-        // *** 2. Full Access API Token - 仅用于本次练习，生产环境切勿直接暴露 ***
-        const FULL_ACCESS_API_TOKEN = 'f10f83b690a49ef9bf37d8b8cdfd634150453fd94babd31dc7038eb9aba457debd56c7455e15201d0ff3426621c3f2528faea14fd10a09cdd12143ff8b122cd74717954ace6d5478c7639e393bc1ded8811afdbfb13935e341b4ad19526f0b1e302433a3dad7123ed072cea90f0f4492b87b914a2ca69d679fb095c939e4eff8';
 
         async function fetchArticles() {
             const articlesContainer = document.getElementById('articles-container');
-            articlesContainer.innerHTML = '<div class="loading-message">正在加载文章...</div>'; // 显示加载状态
+            articlesContainer.innerHTML = '<div class="loading-message">正在加载文章...</div>';
 
             try {
-                const response = await fetch(STRAPI_API_URL, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${FULL_ACCESS_API_TOKEN}` // 为本次练习添加的Token
-                    }
-                });
+                const response = await fetch(STRAPI_API_URL); // ✅ 不再带 Authorization
 
                 if (!response.ok) {
                     const errorText = await response.text();
@@ -89,35 +104,32 @@
                 }
 
                 const data = await response.json();
-
-                articlesContainer.innerHTML = ''; // 清空加载状态
+                articlesContainer.innerHTML = '';
 
                 if (data && data.data && Array.isArray(data.data)) {
                     if (data.data.length === 0) {
                         articlesContainer.textContent = '目前没有找到任何文章。请在 Strapi 后台发布文章。';
                         return;
                     }
+
                     data.data.forEach(article => {
                         const articleElement = document.createElement('div');
                         articleElement.classList.add('article');
 
                         const titleElement = document.createElement('h2');
-                        titleElement.textContent = article.title || '无标题'; // Strapi v5 直接访问 title
+                        titleElement.textContent = article.title || '无标题';
 
-                        const contentElement = document.createElement('div'); // 使用 div 而不是 p，因为它可能包含多个块元素
-                        let articleBodyRendered = false; // 标记是否成功渲染了主体内容
+                        const contentElement = document.createElement('div');
+                        let articleBodyRendered = false;
 
-                        // 尝试从 blocks 动态区域中提取 Rich text 内容
                         if (article.blocks && Array.isArray(article.blocks)) {
                             const richTextBlock = article.blocks.find(block => block.strapi_component === 'blocks.rich-text');
                             if (richTextBlock && richTextBlock.content) {
-                                // *** 核心改进：使用 innerHTML 渲染富文本内容 ***
                                 contentElement.innerHTML = richTextBlock.content;
                                 articleBodyRendered = true;
                             }
                         }
-                        
-                        // 如果 blocks 中没有找到富文本，或者 blocks 不存在，则使用 description 作为备用
+
                         if (!articleBodyRendered) {
                             const descriptionParagraph = document.createElement('p');
                             descriptionParagraph.textContent = article.description || '无内容';
@@ -141,5 +153,8 @@
 
         document.addEventListener('DOMContentLoaded', fetchArticles);
     </script>
+
+
 </body>
+
 </html>
