@@ -96,7 +96,13 @@
             articlesContainer.innerHTML = '<div class="loading-message">正在加载文章...</div>';
 
             try {
-                const response = await fetch(STRAPI_API_URL); // ✅ 不再带 Authorization
+                // ✅ 仅添加了 headers 对象，明确 Content-Type
+                const response = await fetch(STRAPI_API_URL, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
 
                 if (!response.ok) {
                     const errorText = await response.text();
