@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文章详情 - 我的 Strapi 博客</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #0056b3;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+        }
+
+        h2.article-title {
+            color: #333;
+            margin-top: 0;
+            font-size: 2em;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .article-content {
+            font-size: 1.1em;
+            color: #444;
+        }
+
+        .article-content p,
+        .article-content ul,
+        .article-content ol,
+        .article-content h3,
+        .article-content h4 {
+            margin-bottom: 1em;
+        }
+
+        .article-content img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px 0;
+            border-radius: 6px;
+        }
+
+        .error-message,
+        .loading-message {
+            text-align: center;
+            padding: 20px;
+            font-weight: bold;
+        }
+
+        .error-message {
+            color: red;
+            background-color: #ffebeb;
+            border: 1px solid red;
+            border-radius: 5px;
+        }
+
+        .loading-message {
+            color: gray;
+            font-style: italic;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            font-size: 1.1em;
+        }
+
+        .back-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="article-title" id="article-title"></h2>
+        <div class="article-content" id="article-content">
+            <div class="loading-message">正在加载文章详情...</div>
+        </div>
+        <div class="error-message" id="error-message" style="display:none;"></div>
+    </div>
+    <div class="back-link">
+        <a href="index.html">返回文章列表</a>
+    </div>
+
+    <script>
+        // Strapi API 根地址
+        const STRAPI_BASE_URL = 'https://efficient-horses-205a130042.strapiapp.com/api';
+
+        async function fetchArticleDetail() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const articleId = urlParams.get('id'); // 从 URL 获取文章 ID
+
+            const titleElement = document.getElementById('article-title');
+            const contentElement = document.getElementById('article-content');
+            const errorMessageElement = document.getElementById('error-message');
+
+            titleElement.textContent = ''; // 清空标题
+            contentElement.innerHTML = '<div class="loading-message">正在加载文章详情...</div>'; // 显示加载状态
+            errorMessageElement.style.display = 'none';
+
+            if (!articleId) {
+                errorMessageElement.textContent = '错误：未提供文章 ID。';
+                errorMessageElement.style.display = 'block';
+                contentElement.innerHTML = ''; // 清空加载状态
+                return;
+            }
+
+            try {
+                // 请求单篇文章详情，并使用 populate=blocks 获取动态区域内容
+                const response = await fetch(`${STRAPI_BASE_URL}/articles/${articleId}?populate=blocks`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                        // 无需 Authorization 头，因为 Strapi 已配置公共权限
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! Status: ${response.status}, Details: ${errorText}`);
+                }
+
+                const data = await response.json();
+
+                if (data && data.data) {
+                    const article = data.data; // 在 v5 中，单条数据直接在 data 属性下
+
+                    titleElement.textContent = article.title || '无标题';
+                    contentElement.innerHTML = ''; // 清空加载状态
+
+                    let articleBodyRendered = false;
+                    if (article.blocks && Array.isArray(article.blocks)) {
+                        const richTextBlock = article.blocks.find(block => block.strapi_component === 'blocks.rich-text');
+                        if (richTextBlock && richTextBlock.content) {
+                            contentElement.innerHTML = richTextBlock.content; // 渲染富文本 HTML
+                            articleBodyRendered = true;
+                        }
+                    }
+
+                    if (!articleBodyRendered) {
+                        const descriptionParagraph = document.createElement('p');
+                        descriptionParagraph.textContent = article.description || '无内容';
+                        contentElement.appendChild(descriptionParagraph);
+                    }
+                } else {
+                    errorMessageElement.textContent = '未找到该文章或数据格式不正确。';
+                    errorMessageElement.style.display = 'block';
+                    contentElement.innerHTML = '';
+                    console.error('API 返回的数据格式不正确或文章不存在:', data);
+                }
+
+            } catch (error) {
+                console.error('获取文章详情失败:', error);
+                errorMessageElement.textContent = `加载文章详情出错！<br>错误信息: ${error.message}`;
+                errorMessageElement.style.display = 'block';
+                contentElement.innerHTML = '';
+            }
+        }
+
+        // 页面加载完成后立即获取文章详情
+        document.addEventListener('DOMContentLoaded', fetchArticleDetail);
+    </script>
+</body>
+
+</html>

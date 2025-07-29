@@ -123,7 +123,16 @@
                         articleElement.classList.add('article');
 
                         const titleElement = document.createElement('h2');
-                        titleElement.textContent = article.title || '无标题';
+                        const titleLink = document.createElement('a'); // 创建一个链接元素
+                        titleLink.href = `detail.html?id=${article.id}`; // 链接到 detail.html 并传递文章ID
+                        titleLink.textContent = article.title || '无标题'; // 设置链接文本为文章标题
+                        titleElement.appendChild(titleLink); // 将链接添加到 h2 标题中
+                        // 可以在这里加点样式让链接看起来更像可点击的
+                        titleLink.style.cursor = 'pointer';
+                        titleLink.style.color = '#007bff'; // 蓝色链接
+                        titleLink.style.textDecoration = 'none'; // 去掉下划线
+                        titleLink.onmouseover = function () { this.style.textDecoration = 'underline'; };
+                        titleLink.onmouseout = function () { this.style.textDecoration = 'none'; };
 
                         const contentElement = document.createElement('div');
                         let articleBodyRendered = false;
