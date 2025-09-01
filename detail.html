@@ -134,7 +134,7 @@
 
             try {
                 // 请求单篇文章详情，并使用 populate=blocks 获取动态区域内容
-                const response = await fetch(`${STRAPI_BASE_URL}/articles/${articleId}?populate=blocks`, {
+                const response = await fetch(`${STRAPI_BASE_URL}/articles?filters[id][$eq]=${articleId}&populate=blocks`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
@@ -149,8 +149,8 @@
 
                 const data = await response.json();
 
-                if (data && data.data) {
-                    const article = data.data; // 在 v5 中，单条数据直接在 data 属性下
+                if (data && data.data && data.data.length > 0) {
+                    const article = data.data[0]; // 获取数组中的第一个元素 // 在 v5 中，单条数据直接在 data 属性下
 
                     titleElement.textContent = article.title || '无标题';
                     contentElement.innerHTML = ''; // 清空加载状态
