@@ -1,0 +1,7 @@
+{
+  "buildCommand": "npm run build",
+  "framework": "nextjs",
+  "env": {
+    "NEXT_PUBLIC_STRAPI_API_URL": "https://efficient-horses-205a130042.strapiapp.com/api/"
+  }
+}
